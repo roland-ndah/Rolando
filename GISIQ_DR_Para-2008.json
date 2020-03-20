@@ -1,0 +1,75 @@
+[
+   {
+    "ParameterKey": "Rhel7BaseTemplate",
+    "ParameterValue": ""
+   },
+   {
+    "ParameterKey": "SSMDocTemplate",
+    "ParameterValue": "https://gis-main.s3.amazonaws.com/SSMDoc.json"
+   },
+  {
+    "ParameterKey": "WinBaseTemplate",
+    "ParameterValue": "https://gis-main.s3.amazonaws.com/win2008R2-deprecated.json"
+  },
+  {
+    "ParameterKey": "DrivesBaseTemplate",
+    "ParameterValue" : "https://gis-main.s3.amazonaws.com/drives.json"
+  },
+  {
+    "ParameterKey": "EDGE1SubnetId",
+    "ParameterValue": "subnet-05c12be0b38bc5038"
+  },
+  {
+    "ParameterKey": "DMZ1SubnetId",
+    "ParameterValue": "subnet-0f4683b3e6a452c2c"
+  },
+  {
+    "ParameterKey": "BE1SubnetId",
+    "ParameterValue": "subnet-0740fa943c884d6f1"
+  },
+  {
+    "ParameterKey": "CORE1SubnetId",
+    "ParameterValue": "subnet-0461bdc75515adc0f"
+  },
+  {
+    "ParameterKey": "CountryCode",
+    "ParameterValue": "US"
+  },
+  {
+    "ParameterKey": "RegionCode",
+    "ParameterValue": "W2"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "P"
+  },
+  {
+    "ParameterKey": "CustomLinuxAMIId",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "HDDSwapEncrypted",
+    "ParameterValue": "false"
+  },
+  {
+    "ParameterKey": "HDDTypeRoot",
+    "ParameterValue": "io1"
+  },
+  {
+    "ParameterKey": "HDDRootIops",
+    "ParameterValue": "600"
+  },
+  {
+    "ParameterKey": "HDDSizeRoot",
+    "ParameterValue": "250"
+  },
+  {
+    "ParameterKey": "CustomWinAMIId",
+    "ParameterValue": "ami-0f0da5472a195fc44"
+  },
+  {
+    "ParameterKey": "InstallMcAfee",
+    "ParameterValue": "true"
+  }
+
+]
