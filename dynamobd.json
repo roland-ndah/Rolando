@@ -1,0 +1,95 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {"vpccidr": {
+        "Description": "For vpc Cidr Block",
+        "Type": "String"
+  },
+  "pubcidr": {
+      "Description": "For Pubblic Subnet",
+      "Type": "String"
+  },
+  "privatsubcidr": {
+      "Description": " For Private Subnet",
+      "Type": "String"
+  },
+  "AZs": {
+      "Description": "Availability zones",
+      "Type": "String"
+  }
+},
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+      "myvpc": {
+        "Type": "AWS::EC2::VPC",
+        "Properties": {
+          "CidrBlock": { "Ref": "vpccidr" },
+          "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
+        }
+      },
+      "myvpcigw": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+          "Tags": [{ "Key": "Name", "Value":  "myvpcigw" }]
+        }
+      },
+      "AttachGateway": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+          "VpcId": { "Ref": "myvpc" },
+          "InternetGatewayId": { "Ref": "myvpcigw" }
+        }
+      },
+    "pubsub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "AZs" },
+        "VpcId": { "Ref": "myvpc" },
+        "CidrBlock": { "Ref": "pubcidr" },
+        "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
+      }
+    },
+    "privatsub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "AZs" },
+        "VpcId": { "Ref": "myvpc" },
+        "CidrBlock": { "Ref": "privatsubcidr" },
+        "Tags": [{ "Key": "Name", "Value":  "privatsub" }]
+    }
+  },
+    "pubrtb": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "myvpc" },
+        "Tags": [{ "Key": "Name", "Value":  "pubrtb" }]
+      }
+    },
+    "pubrt": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": { "Ref": "pubrtb" },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "myvpcigw" }
+      }
+    },
+    "pubsubass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "pubsub" },
+        "RouteTableId": { "Ref": "pubrtb" }
+      }
+  }
+},
+    "Outputs": {
+
+    }
+}
