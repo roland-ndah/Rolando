@@ -54,7 +54,7 @@ def lambda_handler(event,context):
                 'Value': 'test'
             }
         ]
-    instance_ids = get_instance_ids(ec2_resource)
-    create_default_tags(ec2_client, instance_ids, tags)
-    ebs_ids = get_ebs_ids(ec2_resource)
-    create_default_tags(ec2_client, ebs_ids, tags)
+instance_ids = get_instance_ids(ec2_resource)
+create_default_tags(ec2_client, instance_ids, tags)
+ebs_ids = get_ebs_ids(ec2_resource)
+create_default_tags(ec2_client, ebs_ids, tags)

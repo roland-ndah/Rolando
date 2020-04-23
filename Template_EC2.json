@@ -10,7 +10,7 @@
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
     },
 
-    "InstanceType" : {
+//    "InstanceType" : {
       "Description" : "WebServer EC2 instance type",
       "Type" : "String",
       "Default" : "t2.small",
@@ -192,6 +192,7 @@
       }
     }
   },
+vga
 
   "Outputs" : {
     "InstanceId" : {
