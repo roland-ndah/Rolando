@@ -1,0 +1,128 @@
+{
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Description": "",
+   "Resources": {
+       "ConfigRule": {
+           "Type": "AWS::Config::ConfigRule",
+           "Properties": {
+               "ConfigRuleName": "eip-attached",
+               "Description": "Auto remediation configuration to release unattached Elastic IPs. Detection uses a managed AWS Config Rule and remediation is with SSM Automation.",
+               "Scope": {
+                   "ComplianceResourceTypes": [
+                       "AWS::EC2::EIP"
+                   ]
+               },
+               "Source": {
+                   "Owner": "AWS",
+                   "SourceIdentifier": "EIP_ATTACHED"
+               }
+           }
+       },
+       "RemediationForConfigRule": {
+           "Type": "AWS::Config::RemediationConfiguration",
+           "Properties": {
+               "Automatic": true,
+               "ConfigRuleName": {
+                   "Ref": "ConfigRule"
+               },
+               "MaximumAutomaticAttempts": 5,
+               "RetryAttemptSeconds": 60,
+               "TargetId": "AWS-ReleaseElasticIP",
+               "TargetType": "SSM_DOCUMENT",
+               "TargetVersion": "1",
+               "Parameters": {
+                   "AutomationAssumeRole": {
+                       "StaticValue": {
+                           "Values": [
+                               {
+                                   "Fn::GetAtt": [
+                                       "AutoRemediationIamRole",
+                                       "Arn"
+                                   ]
+                               }
+                           ]
+                       }
+                   },
+                   "AllocationId": {
+                       "ResourceValue": {
+                           "Value": "RESOURCE_ID"
+                       }
+                   }
+               }
+           }
+       },
+       "AutoRemediationIamRole": {
+           "Type": "AWS::IAM::Role",
+           "Properties": {
+               "AssumeRolePolicyDocument": {
+                   "Version": "2012-10-17",
+                   "Statement": [
+                       {
+                           "Effect": "Allow",
+                           "Principal": {
+                               "Service": [
+                                   "ec2.amazonaws.com",
+                                   "events.amazonaws.com",
+                                   "ssm.amazonaws.com"
+                               ]
+                           },
+                           "Action": [
+                               "sts:AssumeRole"
+                           ]
+                       }
+                   ]
+               },
+               "ManagedPolicyArns": [
+                   "arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole"
+               ],
+               "Policies": [
+                   {
+                       "PolicyName": "ReleaseElasticIPPermissions",
+                       "PolicyDocument": {
+                           "Version": "2012-10-17",
+                           "Statement": [
+                               {
+                                   "Sid": "ReleaseElasticIPPermissions",
+                                   "Effect": "Allow",
+                                   "Action": "ec2:ReleaseAddress",
+                                   "Resource": "*"
+                               }
+                           ]
+                       }
+                   }
+               ]
+           }
+       },
+       "AutomationPassRolePolicy": {
+           "Type": "AWS::IAM::Policy",
+           "Properties": {
+               "PolicyName": "passAutomationRole",
+               "PolicyDocument": {
+                   "Version": "2012-10-17",
+                   "Statement": [
+                       {
+                           "Effect": "Allow",
+                           "Action": [
+                               "iam:PassRole"
+                           ],
+                           "Resource": {
+                               "Fn::GetAtt": [
+                                   "AutoRemediationIamRole",
+                                   "Arn"
+                               ]
+                           }
+                       }
+                   ]
+               },
+               "Roles": [
+                   {
+                       "Ref": "AutoRemediationIamRole"
+                   }
+               ]
+           }
+       }
+   },
+   "Parameters": {},
+   "Metadata": {},
+   "Conditions": {}
+ }
