@@ -12,16 +12,48 @@
       "Description": "For Pubblic Subnet",
       "Type": "String"
   },
+  "Imageids": {
+      "Description": "My App image",
+      "Type": "String",
+      "Default": "ami-053115247ac88ae5e"
+
+  },
+  "Pubsub2cidr": {
+      "Description": "For public subet",
+      "Type": "String"
+  },
   "privatsubcidr": {
       "Description": " For Private Subnet",
       "Type": "String"
   },
-  "AZs": {
-      "Description": "Availability zones",
+  "instanceType": {
+      "Description": "My instance types",
+      "Type": "String",
+      "Default": "t2.micro",
+      "AllowedValues" : ["t2.small","t2.small","t2.large","t2.micro"]
+
+  },
+  "keypair": {
+      "Description": "For ssh",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+  },
+  "Prisub2cidr": {
+      "Description": "For private subnet",
       "Type": "String"
+  },
+  "AZAPubsub1": {
+      "Description": "For Availability zone A",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "AZBPubsub2": {
+      "Description": "For Availability zone B",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+
   }
+
 },
     "Mappings": {
+
 
     },
     "Conditions": {
@@ -35,6 +67,7 @@
           "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
         }
       },
+
       "myvpcigw": {
         "Type": "AWS::EC2::InternetGateway",
         "Properties": {
@@ -48,24 +81,49 @@
           "InternetGatewayId": { "Ref": "myvpcigw" }
         }
       },
-    "pubsub": {
+
+
+
+"pubsub": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": { "Ref": "AZs" },
+        "AvailabilityZone": { "Ref": "AZAPubsub1" },
+          "MapPublicIpOnLaunch" : "True",
         "VpcId": { "Ref": "myvpc" },
         "CidrBlock": { "Ref": "pubcidr" },
-        "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
+        "Tags": [{ "Key": "Name", "Value":  "pubsub" }]
       }
     },
+    "pubsub2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "AZBPubsub2" },
+          "MapPublicIpOnLaunch" : "True",
+        "VpcId": { "Ref": "myvpc" },
+        "CidrBlock": { "Ref": "Pubsub2cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "pubsub2" }]
+      }
+    },
+
     "privatsub": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": { "Ref": "AZs" },
+        "AvailabilityZone": { "Ref": "AZAPubsub1" },
         "VpcId": { "Ref": "myvpc" },
         "CidrBlock": { "Ref": "privatsubcidr" },
         "Tags": [{ "Key": "Name", "Value":  "privatsub" }]
     }
   },
+  "privatsub2": {
+    "Type": "AWS::EC2::Subnet",
+    "Properties": {
+      "AvailabilityZone": { "Ref": "AZBPubsub2" },
+      "VpcId": { "Ref": "myvpc" },
+      "CidrBlock": { "Ref": "Prisub2cidr" },
+      "Tags": [{ "Key": "Name", "Value":  "privatsub2" }]
+    }
+  },
+
     "pubrtb": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
@@ -79,16 +137,117 @@
         "RouteTableId": { "Ref": "pubrtb" },
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": { "Ref": "myvpcigw" }
-      }
-    },
+
+    }
+  },
+  "pubsubass2": {
+    "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties": {
+      "SubnetId": { "Ref": "pubsub2" },
+      "RouteTableId": { "Ref": "pubrtb" }
+    }
+  },
     "pubsubass": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "SubnetId": { "Ref": "pubsub" },
         "RouteTableId": { "Ref": "pubrtb" }
       }
-  }
+  },
+  "MyAppSG" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allow http to client host",
+      "VpcId" : {"Ref" : "myvpc"},
+      "SecurityGroupIngress" : [{
+         "IpProtocol" : "tcp",
+         "FromPort" : 80,
+         "ToPort" : 80,
+         "CidrIp" : "0.0.0.0/0"
+      }],
+      "SecurityGroupEgress" : [{
+         "IpProtocol" : "tcp",
+         "FromPort" : 80,
+         "ToPort" : 80,
+         "CidrIp" : "0.0.0.0/0"
+      }]
+   }
 },
+
+    "JJTECHALB" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties" : {
+        "Subnets" : [{ "Ref" :"pubsub"},{ "Ref": "pubsub2" }],
+        "SecurityGroups" : [{ "Ref": "MyAppSG" }]
+      }
+    },
+
+
+    "JJTECHALBListener" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "Type" : "forward",
+          "TargetGroupArn" : { "Ref" : "JJTECHALBTargetGroup" }
+        }],
+        "LoadBalancerArn" : { "Ref" : "JJTECHALB" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+
+    "JJTECHALBTargetGroup" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : 30,
+        "HealthCheckTimeoutSeconds" : 5,
+        "HealthyThresholdCount" : 3,
+        "Port" : 80,
+        "Protocol" : "HTTP",
+        "UnhealthyThresholdCount" : 5,
+        "VpcId" : {"Ref" : "myvpc"},
+        "Targets" :
+        [ { "Id" : { "Ref" : "RoliWbServer1"}, "Port" : 80 },
+          { "Id" : { "Ref" : "RoliWbServer2"}, "Port" : 80 }
+      ]
+      }
+    },
+
+  "RoliWbServer1": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+          "KeyName":  { "Ref": "keypair" },
+          "SecurityGroupIds": [{ "Ref": "MyAppSG" }],
+          "ImageId": { "Ref": "Imageids" },
+          "InstanceType": { "Ref": "instanceType" },
+          "Monitoring": "false",
+          "SubnetId": { "Ref": "pubsub" },
+  "Tags": [{
+            "Key": "Name",
+                  "Value": "RoliWbServer1"
+              }
+          ]
+        }
+      },
+
+  "RoliWbServer2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+          "KeyName":  { "Ref": "keypair" },
+          "SecurityGroupIds": [{ "Ref": "MyAppSG" }],
+          "ImageId": { "Ref": "Imageids" },
+          "InstanceType": { "Ref": "instanceType" },
+          "Monitoring": "false",
+          "SubnetId": { "Ref": "pubsub2" },
+  "Tags": [{
+            "Key": "Name",
+                  "Value": "RoliWbServer"
+              }
+          ]
+        }
+      }
+},
+
     "Outputs": {
 
     }
