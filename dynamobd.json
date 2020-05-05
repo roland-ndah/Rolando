@@ -6,11 +6,13 @@
     },
     "Parameters": {"vpccidr": {
         "Description": "For vpc Cidr Block",
-        "Type": "String"
+        "Type": "String",
+          "Default": "10.0.0.0/16"
   },
   "pubcidr": {
       "Description": "For Pubblic Subnet",
-      "Type": "String"
+      "Type": "String",
+        "Default": "10.0.2.0/24"
   },
   "Imageids": {
       "Description": "My App image",
@@ -20,11 +22,14 @@
   },
   "Pubsub2cidr": {
       "Description": "For public subet",
-      "Type": "String"
+      "Type": "String",
+        "Default": "10.0.1.0/24"
+
   },
   "privatsubcidr": {
       "Description": " For Private Subnet",
-      "Type": "String"
+      "Type": "String",
+        "Default": "10.0.3.0/24"
   },
   "instanceType": {
       "Description": "My instance types",
@@ -39,7 +44,8 @@
   },
   "Prisub2cidr": {
       "Description": "For private subnet",
-      "Type": "String"
+      "Type": "String",
+        "Default": "10.0.4.0/24"
   },
   "AZAPubsub1": {
       "Description": "For Availability zone A",
@@ -173,6 +179,47 @@
       }]
    }
 },
+"JJTECHLC": {
+    "Type" : "AWS::AutoScaling::LaunchConfiguration",
+    "Properties" : {
+        "ImageId" : { "Ref": "Imageids" },
+        "InstanceMonitoring" : "False",
+        "InstanceType" : { "Ref": "instanceType" },
+        "KeyName" : { "Ref": "keypair" },
+        "SecurityGroups" : [ { "Ref": "MyAppSG" } ],
+        "UserData" : {
+            "Fn::Base64":
+                {   "Fn::Join": [
+                        "",
+                        [
+                            "#!/bin/bash -ex",
+                            "-"
+                        ]
+
+                    ]
+                }
+        }
+    }
+},
+
+"JJTECHASG1" : {
+    "Type" : "AWS::AutoScaling::AutoScalingGroup",
+    "Properties" : {
+        "AvailabilityZones" : [{ "Ref": "AZAPubsub1" }, { "Ref": "AZBPubsub2" }],
+        "LaunchConfigurationName" : { "Ref": "JJTECHLC" },
+        "MinSize" : "2",
+        "MaxSize" : "4",
+        "TargetGroupARNs" : [ { "Ref" : "JJTECHALBTargetGroup" } ],
+        "HealthCheckType":"ELB",
+        "HealthCheckGracePeriod" : 600,
+
+        "VPCZoneIdentifier" :  [ { "Ref": "pubsub" },{ "Ref": "pubsub2" }],
+        "Tags" : [ {"Key" : "Name",
+                    "Value" : "JJTECHASG1",
+                    "PropagateAtLaunch" : "True"}
+                ]
+    }
+},
 
     "JJTECHALB" : {
       "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
@@ -205,11 +252,8 @@
         "Port" : 80,
         "Protocol" : "HTTP",
         "UnhealthyThresholdCount" : 5,
-        "VpcId" : {"Ref" : "myvpc"},
-        "Targets" :
-        [ { "Id" : { "Ref" : "RoliWbServer1"}, "Port" : 80 },
-          { "Id" : { "Ref" : "RoliWbServer2"}, "Port" : 80 }
-      ]
+        "VpcId" : {"Ref" : "myvpc"}
+
       }
     },
 
