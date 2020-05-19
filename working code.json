@@ -1,0 +1,547 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\*\generator Riched20 10.0.18362}\viewkind4\uc1
+\pard\sa200\sl276\slmult1\f0\fs22\lang9\{\par
+  "AWSTemplateFormatVersion": "2010-09-09",\par
+      "Description": "Complete Network Environment With ElbAlb",\par
+      "Metadata": \{\par
+  \par
+      \},\par
+      "Parameters": \{\par
+      "USVPCCidr": \{\par
+          "Description": "My VPC Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.0.0/16"\par
+      \},\par
+      \par
+      "SubnetCidr1": \{\par
+          "Description": "WebSubnet1 Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.1.0/24"\par
+      \},\par
+      \par
+      "SubnetCidr2": \{\par
+          "Description": "Websubnet2 Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.2.0/24"\par
+      \},\par
+      \par
+      "SubnetCidr3": \{\par
+          "Description": "Appsubnet1 Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.3.0/24"\par
+      \},\par
+      \par
+      "SubnetCidr4": \{\par
+          "Description": "Appsubnet2 Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.4.0/24"\par
+      \},\par
+      \par
+      "SubnetCidr5": \{\par
+          "Description": "Datasubnet1 Cidr",\par
+          "Type": "String",\par
+          "Default": "10.200.5.0/24"\par
+      \},\par
+      \par
+      "AvailabityZone1": \{\par
+          "Description": "AZ1",\par
+          "Type": "AWS::EC2::AvailabilityZone::Name"\par
+      \},\par
+      \par
+      "AvailabilityZone2": \{\par
+          "Description": "AZ2",\par
+          "Type": "AWS::EC2::AvailabilityZone::Name"\par
+      \},\par
+      \par
+      "SSHLocation" : \{\par
+        "Description" : "Lockdown SSH access to the bastion host (default can be accessed from anywhere)",\par
+        "Type" : "String",\par
+        "MinLength": "9",\par
+        "MaxLength": "18",\par
+        "Default" : "0.0.0.0/0"\par
+      \},\par
+      \par
+      "KeyName": \{\par
+          "Description": "Name of an existing EC2 KeyPair to enable SSH access to the bastion host",\par
+          "Type": \par
+          "AWS::EC2::KeyPair::KeyName"\par
+      \},\par
+      \par
+      "InstanceType": \{\par
+          "Description": "Instance Type",\par
+          "Type": "String",\par
+          "Default": "t2.micro",\par
+          "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small" ]\par
+      \},\par
+      \par
+      "ImageID": \{\par
+          "Description": "-",\par
+          "Type": "String",\par
+          "Default": "ami-0080e4c5bc078760e"\par
+      \}\par
+      \par
+      \par
+      \par
+  \},\par
+      "Mappings": \{\par
+  \par
+      \},\par
+      "Conditions": \{\par
+  \par
+      \},\par
+      "Resources": \{\par
+      "USVPC001": \{\par
+        "Type": "AWS::EC2::VPC",\par
+        "Properties": \{\par
+          "CidrBlock": \par
+          \{ "Ref": "USVPCCidr" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "USVPCCidr" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "Websubnet1": \{\par
+        "Type": "AWS::EC2::Subnet",\par
+        "Properties": \{\par
+          "AvailabilityZone": \par
+          \{ "Ref": "AvailabityZone1" \}\par
+          ,\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "CidrBlock": \par
+          \{ "Ref": "SubnetCidr1" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "WebSubnet1" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "Websubnet2": \{\par
+        "Type": "AWS::EC2::Subnet",\par
+        "Properties": \{\par
+          "AvailabilityZone": \par
+          \{ "Ref": "AvailabilityZone2" \}\par
+          ,\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "CidrBlock": \par
+          \{ "Ref": "SubnetCidr2" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "WebSubnet2" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "AppSubnet1": \{\par
+        "Type": "AWS::EC2::Subnet",\par
+        "Properties": \{\par
+          "AvailabilityZone": \par
+          \{ "Ref": "AvailabityZone1" \}\par
+          ,\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "CidrBlock": \par
+          \{ "Ref": "SubnetCidr3" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "AppSubnet2" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "AppSubnet2": \{\par
+        "Type": "AWS::EC2::Subnet",\par
+        "Properties": \{\par
+          "AvailabilityZone": \par
+          \{ "Ref": "AvailabilityZone2" \}\par
+          ,\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "CidrBlock": \par
+          \{ "Ref": "SubnetCidr4" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "AppSubnet2" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "DataSubnet": \{\par
+        "Type": "AWS::EC2::Subnet",\par
+        "Properties": \{\par
+          "AvailabilityZone": \par
+          \{ "Ref": "AvailabityZone1" \}\par
+          ,\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "CidrBlock": \par
+          \{ "Ref": "SubnetCidr5" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "DataSubnet" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "USIGW": \{\par
+        "Type": "AWS::EC2::InternetGateway",\par
+        "Properties": \{\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "USIGW" \}\par
+          ]\par
+        \}\par
+      \},\par
+      "AttachGateway": \{\par
+        "Type": "AWS::EC2::VPCGatewayAttachment",\par
+        "Properties": \{\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "InternetGatewayId": \{ "Ref": "USIGW" \}\par
+        \}\par
+      \},\par
+      \par
+      \par
+      "USRTB001": \{\par
+        "Type": "AWS::EC2::RouteTable",\par
+        "Properties": \{\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "USRTB001" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "PblRoute": \{\par
+        "Type": "AWS::EC2::Route",\par
+        "Properties": \{\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB001" \}\par
+          ,\par
+          "DestinationCidrBlock": "0.0.0.0/0",\par
+          "GatewayId": \par
+          \{ "Ref": "USIGW" \}  \par
+        \}\par
+      \},\par
+      \par
+      \par
+      "USRTB002": \{\par
+        "Type": "AWS::EC2::RouteTable",\par
+        "Properties": \{\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "USRTB002" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "PrvRoute": \{\par
+        "Type": "AWS::EC2::Route",\par
+        "Properties": \{\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB002" \}\par
+          ,\par
+          "DestinationCidrBlock": "0.0.0.0/0",\par
+          "GatewayId": \par
+          \{ "Ref": "USIGW" \}\par
+          \par
+        \}\par
+      \},\par
+      \par
+      "USRTBData": \{\par
+        "Type": "AWS::EC2::RouteTable",\par
+        "Properties": \{\par
+          "VpcId": \par
+          \{ "Ref": "USVPC001" \}\par
+          ,\par
+          "Tags": [\par
+          \{ "Key": "Name", "Value":  "USRTBData" \}\par
+          ]\par
+        \}\par
+      \},\par
+      \par
+      "USRTBAssData": \{\par
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",\par
+        "Properties": \{\par
+          "SubnetId": \par
+          \{ "Ref": "DataSubnet" \}\par
+          ,\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTBData" \}\par
+          \par
+        \}\par
+      \},\par
+   \par
+      "USRTBAss1": \{\par
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",\par
+        "Properties": \{\par
+          "SubnetId": \par
+          \{ "Ref": "Websubnet1" \},\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB001" \}\par
+        \}\par
+      \},\par
+      \par
+      "USRTBAss2": \{\par
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",\par
+        "Properties": \{\par
+          "SubnetId": \par
+          \{ "Ref": "Websubnet2" \}\par
+          ,\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB001" \}\par
+          \par
+        \}\par
+      \},\par
+      \par
+      "USRTBAss3": \{\par
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",\par
+        "Properties": \{\par
+          "SubnetId": \par
+          \{ "Ref": "AppSubnet1" \}\par
+          ,\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB002" \}\par
+          \par
+        \}\par
+      \},\par
+      \par
+      "USRTBAss4": \{\par
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",\par
+        "Properties": \{\par
+          "SubnetId": \par
+          \{ "Ref": "AppSubnet2" \}\par
+          ,\par
+          "RouteTableId": \par
+          \{ "Ref": "USRTB002" \}\par
+          \par
+        \}\par
+      \},\par
+      "PublicNetworkAcl" : \{\par
+        "Type" : "AWS::EC2::NetworkAcl",\par
+        "Properties" : \{\par
+          "VpcId" : \{ "Ref" : "USVPC001" \},\par
+          "Tags" : [\par
+            \{ "Key" : "Name", "Value" : "PublicNacl" \}\par
+          ]\par
+        \}\par
+      \},\par
+      "InboundHTTPPublicNetworkAclEntry" : \{\par
+        "Type" : "AWS::EC2::NetworkAclEntry",\par
+        "Properties" : \{\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \},\par
+          "RuleNumber" : "100",\par
+          "Protocol" : "6",\par
+          "RuleAction" : "allow",\par
+          "Egress" : "false",\par
+          "CidrBlock" : "0.0.0.0/0",\par
+          "PortRange" : \{ "From" : "80", "To" : "80" \}\par
+        \}\par
+      \},\par
+      "InboundHTTPSPublicNetworkAclEntry" : \{\par
+        "Type" : "AWS::EC2::NetworkAclEntry",\par
+        "Properties" : \{\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \},\par
+          "RuleNumber" : "101",\par
+          "Protocol" : "6",\par
+          "RuleAction" : "allow",\par
+          "Egress" : "false",\par
+          "CidrBlock" : "0.0.0.0/0",\par
+          "PortRange" : \{ "From" : "443", "To" : "443" \}\par
+        \}\par
+      \},\par
+      "InboundSSHPublicNetworkAclEntry" : \{\par
+        "Type" : "AWS::EC2::NetworkAclEntry",\par
+        "Properties" : \{\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \},\par
+          "RuleNumber" : "102",\par
+          "Protocol" : "6",\par
+          "RuleAction" : "allow",\par
+          "Egress" : "false",\par
+          "CidrBlock" : \{ "Ref" : "SSHLocation" \},\par
+          "PortRange" : \{ "From" : "22", "To" : "22" \}\par
+        \}\par
+      \},\par
+      "InboundEphemeralPublicNetworkAclEntry" : \{\par
+        "Type" : "AWS::EC2::NetworkAclEntry",\par
+        "Properties" : \{\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \},\par
+          "RuleNumber" : "103",\par
+          "Protocol" : "6",\par
+          "RuleAction" : "allow",\par
+          "Egress" : "false",\par
+          "CidrBlock" : "0.0.0.0/0",\par
+          "PortRange" : \{ "From" : "1024", "To" : "65535" \}\par
+        \}\par
+      \},\par
+  \par
+      "OutboundPublicNetworkAclEntry" : \{\par
+        "Type" : "AWS::EC2::NetworkAclEntry",\par
+        "Properties" : \{\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \},\par
+          "RuleNumber" : "100",\par
+          "Protocol" : "6",\par
+          "RuleAction" : "allow",\par
+          "Egress" : "true",\par
+          "CidrBlock" : "0.0.0.0/0",\par
+          "PortRange" : \{ "From" : "0", "To" : "65535" \}\par
+        \}\par
+      \},\par
+  \par
+      "PublicSubnetNetworkAclAssociation" : \{\par
+        "Type" : "AWS::EC2::SubnetNetworkAclAssociation",\par
+        "Properties" : \{\par
+          "SubnetId" : \{ "Ref" : "Websubnet1" \},\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \}\par
+        \}\par
+      \},\par
+      "PublicSubnetNetworkAclAssociation2" : \{\par
+        "Type" : "AWS::EC2::SubnetNetworkAclAssociation",\par
+        "Properties" : \{\par
+          "SubnetId" : \{ "Ref" : "Websubnet2" \},\par
+          "NetworkAclId" : \{ "Ref" : "PublicNetworkAcl" \}\par
+        \}\par
+      \},\par
+      \par
+      "ApplicationLoadBalancer" : \{\par
+        "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",\par
+        "Properties" : \{\par
+          "Subnets" : [\{ "Ref" :"Websubnet1"\},\par
+          \{ "Ref": "Websubnet2" \}]\par
+          \par
+        \}\par
+      \},\par
+  \par
+      "ALBListener" : \{\par
+        "Type" : "AWS::ElasticLoadBalancingV2::Listener",\par
+        "Properties" : \{\par
+          "DefaultActions" : [\{\par
+            "Type" : "forward",\par
+            "TargetGroupArn" : \{ "Ref" : "ALBTargetGroup" \}\par
+          \}],\par
+        "LoadBalancerArn" : \{ "Ref" : "ApplicationLoadBalancer" \},\par
+        "Port" : "80",\par
+        "Protocol" : "HTTP"\par
+        \}\par
+      \},\par
+  \par
+      "ALBTargetGroup" : \{\par
+        "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",\par
+        "Properties" : \{\par
+          "HealthCheckIntervalSeconds" : 30,\par
+          "HealthCheckTimeoutSeconds" : 5,\par
+          "HealthyThresholdCount" : 3,\par
+          "Port" : 80,\par
+          "Protocol" : "HTTP",\par
+          "UnhealthyThresholdCount" : 5,\par
+          "VpcId" : \{"Ref" : "USVPC001"\},\par
+          "Targets" : \par
+            [ \{ "Id" : \{ "Ref" : "Webserver001"\}, "Port" : 80 \},\par
+              \{ "Id" : \{ "Ref" : "Webserver002"\}, "Port" : 80 \}\par
+          ],\par
+          "TargetGroupAttributes" :\par
+            [ \{ "Key" : "stickiness.enabled", "Value" : "true" \},\par
+              \{ "Key" : "stickiness.type", "Value" : "lb_cookie" \},\par
+              \{ "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "180" \}\par
+          ]\par
+          \}\par
+        \},\par
+      \par
+      "Webserver001": \{\par
+          "Type": "AWS::EC2::Instance",\par
+          "Properties": \{\par
+              "KeyName": \par
+              \{ "Ref": "KeyName" \},\par
+              "SecurityGroupIds": [\par
+                \{\par
+                    "Ref": "USSG001"\par
+                \}\par
+            ],\par
+              "ImageId": \par
+              \{ "Ref": "ImageID" \}\par
+              ,\par
+              "InstanceType": \par
+              \{ "Ref": "InstanceType" \},\par
+              "Monitoring": "false",\par
+              "SubnetId": \par
+              \{ "Ref": "Websubnet1" \},\par
+              \par
+              "Tags": [\par
+                  \{\par
+                      "Key": "Name",\par
+                      "Value": "WebServer001"\par
+                  \}\par
+              ]\par
+            \}\par
+          \},\par
+          \par
+          "Webserver002": \{\par
+            "Type": "AWS::EC2::Instance",\par
+            "Properties": \{\par
+                "KeyName": \par
+                \{ "Ref": "KeyName" \},\par
+                "SecurityGroupIds": [\par
+                  \{\par
+                      "Ref": "USSG001"\par
+                  \}\par
+              ],\par
+                "ImageId": \par
+                \{ "Ref": "ImageID" \}\par
+                ,\par
+                "InstanceType": \par
+                \{ "Ref": "InstanceType" \},\par
+                "Monitoring": "false",\par
+                "SubnetId": \par
+                \{ "Ref": "Websubnet2" \},\par
+                \par
+                "Tags": [\par
+                    \{\par
+                        "Key": "Name",\par
+                        "Value": "WebServer002"\par
+                    \}\par
+                ]\par
+              \}\par
+            \},\par
+            "USSG001" : \{\par
+              "Type" : "AWS::EC2::SecurityGroup",\par
+              "Properties" : \{\par
+                "GroupDescription" : "WebLayer SecurityGroup",\par
+                "GroupName" : "USSG001",\par
+                "SecurityGroupIngress" : [\{\par
+                  "IpProtocol" : "tcp",\par
+                  "FromPort" : "80",\par
+                  "ToPort" : "80",\par
+                  "CidrIp" : "0.0.0.0/0"\par
+               \},\{\par
+                  "IpProtocol" : "tcp",\par
+                  "FromPort" : "22",\par
+                  "ToPort" : "22",\par
+                  "CidrIp" : "0.0.0.0/0"\par
+               \}],\par
+                "VpcId" : \par
+                \{ "Ref": "USVPC001" \}\par
+                ,\par
+                "Tags" :  [\par
+                \{ "Key": "Name", "Value":  "Weblayer SecGrp" \}\par
+                ]\par
+              \}\par
+            \}\par
+          \},\par
+  \par
+      "Outputs": \{\}\par
+  \}\par
+}
+ 

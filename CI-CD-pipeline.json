@@ -698,6 +698,7 @@
         } ]
       }
     },
+
     "DemoApplication" : {
       "Type" : "AWS::CodeDeploy::Application"
     },

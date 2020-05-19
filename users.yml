@@ -1,0 +1,26 @@
+#This play book will launch Insatnces on the console
+---
+- name: ec2 launcher
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: launching ec2
+      ec2:
+        instance_type: t2.micro
+        image: ami-053115247ac88ae5e
+        region: us-east-1
+        vpc_subnet_id: subnet-08bbb6f89dbdfe432
+        group: default
+        wait: yes
+        count: 4
+  #Ansible Play books to create IAM users
+- name: Create a stack set with instances in two accounts
+  cloudformation_stack_set:
+    name: my-stack
+    description: Test stack in two accounts
+    state: present
+    template_url: https://s3.amazonaws.com/my-bucket/cloudformation.template
+    accounts: [1234567890, 2345678901]
+    regions:
+    - us-east-1

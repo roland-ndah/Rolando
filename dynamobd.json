@@ -243,6 +243,7 @@
       }
     },
 
+
     "JJTECHALBTargetGroup" : {
       "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
       "Properties" : {

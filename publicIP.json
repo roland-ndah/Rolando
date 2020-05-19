@@ -1,0 +1,15 @@
+"billingattributionapi" : {
+  "Type"        : "AWS::EC2::Instance",
+  "Properties"  : {
+
+    "NetworkInterfaces" : [
+      {
+        "AssociatePublicIpAddress"  : "true",
+        "DeviceIndex"               : "eth0",
+        "NetworkInterfaceId"        : {"Ref" : "netinterface"},
+        "DeleteOnTermination"       : "true"
+      }
+
+    ]
+  }
+}

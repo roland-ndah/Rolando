@@ -40,13 +40,13 @@
       "Description": "For private subnet",
       "Type": "String"
   },
-  "AZsa": {
-      "Description": "Availability zones",
-      "Type": "String"
-    },
-  "AZsb": {
-      "Description": "Availability zones",
-      "Type": "String"
+  "AZAPubsub1": {
+      "Description": "For Availability zone A",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "AZBPubsub2": {
+      "Description": "For Availability zone B",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
   }
 },
     "Mappings": {
@@ -63,10 +63,64 @@
           "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
         }
       },
+      "pubsub": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "MapPublicIpOnLaunch" : "True",
+          "AvailabilityZone": { "Ref": "AZAPubsub1" },
+          "VpcId": { "Ref": "myvpc" },
+          "CidrBlock": { "Ref": "pubcidr" },
+          "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
+        }
+      },
+      "pubsub2": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "MapPublicIpOnLaunch" : "True",
+          "AvailabilityZone": { "Ref": "AZBPubsub2" },
+          "VpcId": { "Ref": "myvpc" },
+          "CidrBlock": { "Ref": "Pubsub2cidr" },
+          "Tags": [{ "Key": "Name", "Value":  "pubsub2" }]
+        }
+      },
+  "privatsub": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+              "AvailabilityZone": { "Ref": "AZAPubsub1" },
+              "VpcId": { "Ref": "myvpc" },
+              "CidrBlock": { "Ref": "privatsubcidr" },
+              "Tags": [{ "Key": "Name", "Value":  "privatsub" }]
+          }
+        },
+
+        "privatsub2": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+            "AvailabilityZone": { "Ref": "AZBPubsub2" },
+            "VpcId": { "Ref": "myvpc" },
+            "CidrBlock": { "Ref": "Prisub2cidr" },
+            "Tags": [{ "Key": "Name", "Value":  "privatsub2" }]
+          }
+        },
+        "myvpcigw": {
+          "Type": "AWS::EC2::InternetGateway",
+          "Properties": {
+            "Tags": [{ "Key": "Name", "Value":  "myvpcigw" }]
+          }
+        },
+        "AttachGateway": {
+          "Type": "AWS::EC2::VPCGatewayAttachment",
+          "Properties": {
+            "VpcId": { "Ref": "myvpc" },
+            "InternetGatewayId": { "Ref": "myvpcigw" }
+          }
+        },
       "InstanceSecurityGroup" : {
    "Type" : "AWS::EC2::SecurityGroup",
    "Properties" : {
       "GroupDescription" : "Allow http to client host",
+
+
       "VpcId" : {"Ref" : "myvpc"},
       "SecurityGroupIngress" : [{
          "IpProtocol" : "tcp",
@@ -82,24 +136,21 @@
       }]
    }
 },
+
 "ALBSG" : {
   "Type" : "AWS::EC2::SecurityGroup",
   "Properties" : {
     "GroupDescription" : "-",
     "SecurityGroupIngress" : [{
       "IpProtocol" : "tcp",
-      "FromPort" : 80,
-      "ToPort" : 80,
-      "FromPort" : 443,
-      "ToPort" : 443,
+      "FromPort" : "80",
+      "ToPort" : "80",
       "CidrIp" : "0.0.0.0/0"
     }],
     "SecurityGroupEgress" : [{
        "IpProtocol" : "tcp",
-       "FromPort" : 80,
-       "ToPort" : 80,
-       "FromPort" : 443,
-       "ToPort" : 443,
+       "FromPort" : "80",
+       "ToPort" : "80",
        "CidrIp" : "0.0.0.0/0"
     }],
     "VpcId" : { "Ref": "myvpc" },
@@ -119,6 +170,30 @@
           "InternetGatewayId": { "Ref": "myvpcigw" }
         }
       },
+      "pubrt": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": { "Ref": "pubrtb" },
+          "DestinationCidrBlock": "0.0.0.0/0",
+          "GatewayId": { "Ref": "myvpcigw" }
+
+      }
+    },
+    "pubsub2ass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "pubsub2" },
+        "RouteTableId": { "Ref": "pubrtb" }
+      }
+    },
+    "pubsubass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "pubsub" },
+        "RouteTableId": { "Ref": "pubrtb" }
+
+        }
+    },
 
       "ApplicationLoadBalancer" : {
         "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
@@ -140,6 +215,7 @@
         "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalancer" },
         "Port" : "80",
         "Protocol" : "HTTP"
+
         }
       },
 
@@ -149,6 +225,7 @@
           "HealthCheckIntervalSeconds" : 30,
           "HealthCheckTimeoutSeconds" : 5,
           "HealthyThresholdCount" : 3,
+
           "Port" : 80,
           "Protocol" : "HTTP",
           "UnhealthyThresholdCount" : 5,
@@ -164,132 +241,51 @@
           ]
           }
         },
+        "RolandoLC" : {
+         "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "ImageId" : { "Ref": "Imageids" },
+          "SecurityGroups" : [ { "Ref": "InstanceSecurityGroup" } ],
+            "InstanceType" : { "Ref": "instanceType" },
+              "KeyName" : { "Ref": "keypair" },
+              "InstanceMonitoring" : "false",
+              "BlockDeviceMappings" : [ {
+                  "DeviceName" : "/dev/sdk",
+                  "Ebs" : {"VolumeSize" : "50"}
+               }, {
+                  "DeviceName" : "/dev/sdc",
+                  "VirtualName" : "ephemeral0"
+            } ]
+         }
+       },
+       "RolandASG" : {
+         "Type" : "AWS::AutoScaling::AutoScalingGroup",
+         "Properties" : {
+           "LaunchConfigurationName" : {
+             "Ref" : "RolandoLC"
+           },
+           "VPCZoneIdentifier" : [ {
+             "Ref" : "pubrtb"
+           }, {
+             "Ref" : "pubsub2"
+           } ],
+           "MinSize" : 1,
+           "MaxSize" : 4,
+           "DesiredCapacity" : {
+             "Ref" : "InstanceCount"
+           },
+           "LoadBalancerNames": [
+             {
+               "Ref" : "ApplicationLoadBalancer"
+             }
+           ],
+           "HealthCheckType":"ApplicationLoadBalancer",
+           "HealthCheckGracePeriod" : 600,
+           "Tags" : [ {
+             "Key" :  "Name",
+             "Value" : "RolandoASG",
+             "PropagateAtLaunch" : "true"
+           } ]
 
-    "pubsub": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch" : "True",
-        "AvailabilityZone": { "Ref": "AZsa" },
-        "VpcId": { "Ref": "myvpc" },
-        "CidrBlock": { "Ref": "pubcidr" },
-        "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
-      }
-    },
-    "pubsub2": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch" : "True",
-        "AvailabilityZone": { "Ref": "AZsb" },
-        "VpcId": { "Ref": "myvpc" },
-        "CidrBlock": { "Ref": "Pubsub2cidr" },
-        "Tags": [{ "Key": "Name", "Value":  "pubsub2" }]
-      }
-    },
-    "Webserver001": {
-        "Type": "AWS::EC2::Instance",
-        "Properties": {
-            "KeyName":
-            { "Ref": "keypair" },
-            "SecurityGroupIds": [
-              {
-                  "Ref": "InstanceSecurityGroup"
-              }
-          ],
-            "ImageId":
-            { "Ref": "Imageids" }
-            ,
-            "InstanceType":
-            { "Ref": "instanceType" },
-            "Monitoring": "false",
-            "SubnetId":
-            { "Ref": "pubsub" },
-
-            "Tags": [
-                {
-                    "Key": "Name",
-                    "Value": "WebServer001"
-                }
-            ]
-          }
-        },
-        "Webserver002": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-                "KeyName":
-                { "Ref": "keypair" },
-                "SecurityGroupIds": [
-                  {
-                      "Ref": "InstanceSecurityGroup"
-                  }
-              ],
-                "ImageId":
-                { "Ref": "Imageids" }
-                ,
-                "InstanceType":
-                { "Ref": "instanceType" },
-                "Monitoring": "false",
-                "SubnetId":
-                { "Ref": "pubsub2" },
-
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "WebServer001"
-                    }
-                ]
-              }
-            },
-
-    "privatsub": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "AvailabilityZone": { "Ref": "AZsa" },
-        "VpcId": { "Ref": "myvpc" },
-        "CidrBlock": { "Ref": "privatsubcidr" },
-        "Tags": [{ "Key": "Name", "Value":  "privatsub" }]
-    }
-  },
-
-  "privatsub2": {
-    "Type": "AWS::EC2::Subnet",
-    "Properties": {
-      "AvailabilityZone": { "Ref": "AZsb" },
-      "VpcId": { "Ref": "myvpc" },
-      "CidrBlock": { "Ref": "Prisub2cidr" },
-      "Tags": [{ "Key": "Name", "Value":  "privatsub2" }]
-    }
-  },
-
-    "pubrtb": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": { "Ref": "myvpc" },
-        "Tags": [{ "Key": "Name", "Value":  "pubrtb" }]
-      }
-    },
-    "pubrt": {
-      "Type": "AWS::EC2::Route",
-      "Properties": {
-        "RouteTableId": { "Ref": "pubrtb" },
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": { "Ref": "myvpcigw" }
-
-    }
-  },
-  "pubsub2ass": {
-    "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    "Properties": {
-      "SubnetId": { "Ref": "pubsub2" },
-      "RouteTableId": { "Ref": "pubrtb" }
-    }
-  },
-  "pubsubass": {
-    "Type": "AWS::EC2::SubnetRouteTableAssociation",
-    "Properties": {
-      "SubnetId": { "Ref": "pubsub" },
-      "RouteTableId": { "Ref": "pubrtb" }
-
-      }
   }
 },
     "Outputs": {

@@ -1,0 +1,142 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {"vpccidr": {
+        "Description": "For VPC",
+        "Type": "String"
+    },
+    "Pubsn1cidr": {
+        "Description": "For Public Subnet",
+        "Type": "String"
+  },
+    "Pubsn2cidr": {
+        "Description": "For Public Subnet",
+        "Type": "String"
+  },
+      "PrivateSub1cidr": {
+          "Description": "For Private Subnet",
+          "Type": "String"
+  },
+        "PrivateSub2cidr": {
+            "Description": "For Private Subnet",
+            "Type": "String"
+  },
+  "AZsa": {
+      "Description": "For availability zons",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+    },
+"AZsb": {
+    "Description": "For availability zons",
+    "Type": "AWS::EC2::AvailabilityZone::Name"
+},
+"AZsc": {
+    "Description": "For availability zons",
+    "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "AZsd": {
+      "Description": "For availability zons",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+}
+},
+
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {"RolliVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": { "Ref": "vpccidr" },
+        "Tags": [{ "Key": "Name", "Value":  "RolliVPC" }]
+      }
+    },
+    "Rolliigw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [{ "Key": "Name", "Value":  "RolliVPC" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": "--",
+        "InternetGatewayId": { "Ref": "Rolliigw" }
+      }
+    },
+    "RollIPubsn1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "VpcId": { "Ref": "RolliVPC" },
+        "CidrBlock": { "Ref": "Pubsn1cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "RollIPubsn1" }]
+      }
+    },
+    "RolliPubsn2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone":  [ "1", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] },
+        "VpcId": { "Ref": "RolliVPC" },
+        "CidrBlock": { "Ref": "Pubsn2cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "RolliPubsn2" }]
+      }
+    },
+    "PrivateSub1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "AZsc" },
+        "VpcId": { "Ref": "RolliVPC" },
+        "CidrBlock": { "Ref": "PrivateSub1cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "PrivateSub1" }]
+      }
+    },
+    "Myrtb": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "RolliVPC" },
+        "Tags": [{ "Key": "Name", "Value":  "RolliVPC" }]
+      }
+    },
+    "Route1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": { "Ref": "Myrtb" },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "Rolliigw" }
+      }
+    },
+    "route1Ass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "RollIPubsn1" },
+        "RouteTableId": { "Ref": "Myrtb" }
+      }
+    },
+    "route2Ass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "RolliPubsn2" },
+        "RouteTableId": { "Ref": "Myrtb" }
+      }
+    },
+
+    "PrivateSub2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "AZsd" },
+        "VpcId": { "Ref": "RolliVPC" },
+        "CidrBlock": { "Ref": "PrivateSub2cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "PrivateSub2" }]
+
+      }
+    }
+},
+    "Outputs": {
+
+    }
+}

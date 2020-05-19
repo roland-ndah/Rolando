@@ -1,0 +1,135 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {
+
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {"TranGWVPC1": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "Tags": [{ "Key": "Name", "Value":  "TranGWVPC1" }]
+      }
+    },
+    "Trans1PriSub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1a",
+        "VpcId": { "Ref": "TranGWVPC1" },
+        "CidrBlock": "10.0.1.0/24",
+        "Tags": [{ "Key": "Name", "Value":  "Trans1PriSub" }]
+      }
+    },
+    "Trans1PubSub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1b",
+        "VpcId": { "Ref": "TranGWVPC1" },
+        "CidrBlock": "10.0.2.0/24",
+        "Tags": [{ "Key": "Name", "Value":  "Trans1PubSub" }]
+      }
+    },
+    "TransitVPCIGW": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [{ "Key": "Name", "Value":  "TransitVPCIGW" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "TranGWVPC1" },
+        "InternetGatewayId": { "Ref": "TransitVPCIGW" }
+      }
+    },
+    "TranGWVPC1RTB": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "TranGWVPC1" },
+        "Tags": [{ "Key": "Name", "Value":  "TranGWVPC1RTB" }]
+      }
+    },
+    "PublicRT": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": { "Ref": "TranGWVPC1RTB" },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "TransitVPCIGW" }
+      }
+    },
+
+        "Resources": {"TranGWVPC2": {
+          "Type": "AWS::EC2::VPC",
+          "Properties": {
+            "CidrBlock": "10.2.0.0/16",
+            "Tags": [{ "Key": "Name", "Value":  "TranGWVPC2" }]
+          }
+        },
+        "Trans2PriSub": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+            "AvailabilityZone": "us-east-1a",
+            "VpcId": { "Ref": "TranGWVPC2" },
+            "CidrBlock": "10.0.1.0/24",
+            "Tags": [{ "Key": "Name", "Value":  "Trans2PriSub" }]
+          }
+        },
+        "Trans2PubSub": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+            "AvailabilityZone": "us-east-1b",
+            "VpcId": { "Ref": "TranGWVPC2" },
+            "CidrBlock": "10.0.2.0/24",
+            "Tags": [{ "Key": "Name", "Value":  "Trans2PubSub" }]
+          }
+        },
+        "TransitVPC2IGW": {
+          "Type": "AWS::EC2::InternetGateway",
+          "Properties": {
+            "Tags": [{ "Key": "Name", "Value":  "TransitVPC2IGW" }]
+          }
+        },
+        "AttachGateway": {
+          "Type": "AWS::EC2::VPCGatewayAttachment",
+          "Properties": {
+            "VpcId": { "Ref": "TranGWVPC2" },
+            "InternetGatewayId": { "Ref": "TransitVPC2IGW" }
+          }
+        },
+        "TranGWVPC2RTB": {
+          "Type": "AWS::EC2::RouteTable",
+          "Properties": {
+            "VpcId": { "Ref": "TranGWVPC1" },
+            "Tags": [{ "Key": "Name", "Value":  "TranGWVPC1RTB" }]
+          }
+        },
+        "PublicRT2": {
+          "Type": "AWS::EC2::Route",
+          "Properties": {
+            "RouteTableId": { "Ref": "TranGWVPC2RTB" },
+            "DestinationCidrBlock": "0.0.0.0/0",
+            "GatewayId": { "Ref": "TransitVPC2IGW" }
+
+
+
+
+
+          }
+        }
+      },
+
+  "Outputs": {
+
+
+}
+}
+}

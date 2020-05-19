@@ -1,0 +1,155 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {"CTFPractice": {
+        "Description": "choose your resources",
+        "Type": "String",
+        "Default": "10.200.0.0/16"
+    },
+    "webImageID": {
+        "Description": "Choose an Image ID",
+        "Type":"AWS::EC2::Image::Id"
+    },
+    "webseverkey": {
+        "Description": "choose a keypair",
+        "Type":"AWS::EC2::KeyPair::KeyName"
+    },
+    "webserver": {
+        "Description": "choose instance type",
+        "Type": "String",
+        "Default": "t2.micro",
+        "Allowedvalues" : ["t2.micro","t2.nano","t2.small"]
+    },
+    "subnet1cidr": {
+        "Description": "choose a subnet1cidr",
+        "Type": "String",
+        "Default": "10.200.1.0/24"
+    },
+    "subnet2cider": {
+        "Description": "choose subnet2cider",
+        "Type": "String",
+        "Default": "10.200.2.0/24"
+    },
+    "subnet1cidrAZ": {
+        "Description": "choose subnet1cidrAZ",
+        "Type": "AWS::EC2::AvailabilityZone::Name"
+    },
+  "subnet2ciderAZs": {
+      "Description": "choose an subnet2ciderAZs",
+      "Type":"AWS::EC2::AvailabilityZone::Name"
+    }
+  },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {"CTFPractice": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock":"10.200.0.0/16",
+        "Tags": [{ "Key": "Name", "Value":  "CTFPractice" }]
+    }
+    },
+
+    "subnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Ref": "subnet2ciderAZsAZ" },
+        "VpcId": { "Ref": "CTFPractice" },
+        "CidrBlock": { "Ref": "subnet1cidr" },
+        "Tags": [{ "Key": "Name", "Value":  "subnet1" }]
+      }
+      },
+      "subnet2": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "AvailabilityZone": { "Ref": "subnet2ciderAZs" },
+          "VpcId": { "Ref": "CTFPractice" },
+          "CidrBlock": { "Ref": "subnet2cider" },
+          "Tags": [{ "Key": "Name", "Value":  "subnet2" }]
+        }
+      },
+        "IGT": {
+          "Type": "AWS::EC2::InternetGateway",
+          "Properties": {
+            "Tags": [{ "Key": "Name", "Value":  "IGT" }]
+          }
+        },
+        "AttachGatewayNew": {
+          "Type": "AWS::EC2::VPCGatewayAttachment",
+          "Properties": {
+            "VpcId": { "Ref": "CTFPractice" },
+            "InternetGatewayId": { "Ref": "IGT" }
+          }
+        },
+        "RTable": {
+          "Type": "AWS::EC2::RouteTable",
+          "Properties": {
+            "VpcId": "CTFPractice",
+            "Tags": [{ "Key": "Name", "Value":  "RTable" }]
+          }
+        },
+        "Route": {
+          "Type": "AWS::EC2::Route",
+          "Properties": {
+            "RouteTableId": "RTable",
+            "DestinationCidrBlock": "0.0.0.0/0",
+            "GatewayId": "IGT"
+          }
+        },
+        "routeTableAssoc1": {
+          "Type": "AWS::EC2::SubnetRouteTableAssociation",
+          "Properties": {
+            "SubnetId": { "Ref": "subnet1" },
+            "RouteTableId": { "Ref": "RTable" }
+          }
+        },
+  "SecurityA" : {
+    "Type" : "AWS::EC2::SecurityGroup",
+    "Properties" : {
+      "GroupDescription" : "myEC2webserver security group",
+       "GroupName" : "securityGroup",
+      "SecurityGroupIngress" :
+        [{
+               "IpProtocol" : "tcp",
+               "FromPort" : 80,
+               "ToPort" : 80,
+               "CidrIp" : "0.0.0.0/0"
+            },{
+            "IpProtocol" : "tcp",
+            "FromPort" : 22,
+            "ToPort" : 22,
+            "CidrIp" : "0.0.0.0/0"  }],
+      "VpcId" : { "Ref": "CTFPractice" },
+      "Tags" :{ "Key": "Name", "Value":  "SecurityA" }
+    }
+  },
+"myEC2webserver": {
+    "Type": "AWS::EC2::Instance",
+    "Properties": {
+      "SubnetId" :{ "Ref": "subnet1" },
+        "KeyName": { "Ref": "webseverkey" },
+        "ImageId": { "Ref": "webImageID" },
+        "InstanceType": { "Ref": "webserver" },
+        "Monitoring": "false",
+        "SecurityGroupIds" : { "Ref": "SecurityA" },
+        "Tags": [
+            {
+                "Key": "Name",
+                "Value": "myEC2webserver"
+            }
+        ]
+
+        }
+      }
+    },
+
+    "Outputs": {
+
+    }
+}
