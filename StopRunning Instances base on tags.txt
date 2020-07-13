@@ -1,0 +1,35 @@
+from boto3.session import Session
+from botocore.exceptions import ClientError
+
+aws_access_key = ''
+aws_secret_key = ''
+region = ''
+
+def lambda_handler(event, context):
+   try:
+       sess = Session(aws_access_key_id=aws_access_key,
+                   aws_secret_access_key=aws_secret_key)
+       ec2_conn = sess.client(service_name='ec2', region_name=region)
+
+       instance_ids = []
+       reservations = ec2_conn.describe_instances(
+                                Filters=[
+                                    {
+                                                                                'Name': 'tag:Application',
+                                        'Values': [
+                                            'exampleName',
+                                        ]
+                                    },
+                                    {
+                                        'Name': 'tag:Vertical',
+                                        'Values': [
+                                            'exampleVertical',
+                                        ]
+                                    },
+                                    {
+                                        'Name': 'instance-state-name',
+                                        'Values': [
+                                            'running',
+                                        ]
+                                    },
+                                ])['Reservations']

@@ -1,0 +1,115 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {
+    "VPCCIDR": {
+        "Description": "For my vpc",
+        "Type": "String"
+    },
+  
+  "PubSubCIDR": {
+      "Description": "For public Subnet",
+      "Type": "String"
+  },
+  "PrivateSubCIDR": {
+    "Description": "For public Subnet",
+    "Type": "String"
+  },
+  
+  "AZA": {
+      "Description": "US East-1",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "AZB": {
+    "Description": "US East-1",
+    "Type": "AWS::EC2::AvailabilityZone::Name"
+  }
+},
+    
+  
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+    "InfosysVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": { "Ref": "VPCCIDR" },
+        "Tags": [{ "Key": "Name", "Value":  "InfosysVPC" }]
+      }
+    },
+
+    
+    
+    "InfosysVPCIGW": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags":[{ "Key": "Name", "Value":  "InfosysVPCIGW" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "InfosysVPC" },
+        "InternetGatewayId": { "Ref": "InfosysVPCIGW" }
+      }
+    },
+   
+   
+   "InfosysRTB": {
+     "Type": "AWS::EC2::RouteTable",
+     "Properties": {
+       "VpcId": { "Ref": "InfosysVPC" },
+      "Tags": [{ "Key": "Name", "Value":  "InfosysVPCRTB" }]
+     }
+   },
+   
+   "InfosysRoute": {
+     "Type": "AWS::EC2::Route",
+     "Properties": {
+       "RouteTableId": { "Ref": "InfosysRTB" },
+       "DestinationCidrBlock": "0.0.0.0/0",
+       "GatewayId": { "Ref": "InfosysVPCIGW" }
+       
+     }
+   },
+   
+   "PubRouteAss": {
+     "Type": "AWS::EC2::SubnetRouteTableAssociation",
+     "Properties": {
+       "SubnetId": { "Ref": "PublicSub" },
+       "RouteTableId": { "Ref": "InfosysRTB" }
+       
+     }
+   },
+   
+   "PublicSub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+       "AvailabilityZone":  { "Ref": "AZA" },
+        "VpcId": { "Ref": "InfosysVPC" },
+        "CidrBlock":  { "Ref": "PubSubCIDR" },
+        "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
+      }
+    },
+    
+    "PrivateSub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone":  { "Ref": "AZA" },
+        "VpcId": { "Ref": "InfosysVPC" },
+        "CidrBlock":  { "Ref": "PrivateSubCIDR" },
+        "Tags":[{ "Key": "Name", "Value":  "PrivateSub" }]
+      }
+    }
+  },
+    "Outputs": {
+
+    }
+}
