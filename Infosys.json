@@ -14,6 +14,10 @@
       "Description": "For public Subnet",
       "Type": "String"
   },
+  "PubSub2CIDR": {
+    "Description": "For public Subnet",
+    "Type": "String"
+  },
   "PrivateSubCIDR": {
     "Description": "For public Subnet",
     "Type": "String"
@@ -89,12 +93,28 @@
      }
    },
    
+   "PubRouteAss2": {
+    "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties": {
+      "SubnetId": { "Ref": "PublicSub2" },
+      "RouteTableId": { "Ref": "InfosysRTB" }
+    }
+  },
    "PublicSub": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
        "AvailabilityZone":  { "Ref": "AZA" },
         "VpcId": { "Ref": "InfosysVPC" },
         "CidrBlock":  { "Ref": "PubSubCIDR" },
+        "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
+      }
+    },
+    "PublicSub2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+       "AvailabilityZone":  { "Ref": "AZB" },
+        "VpcId": { "Ref": "InfosysVPC" },
+        "CidrBlock":  { "Ref": "PubSub2CIDR" },
         "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
       }
     },
