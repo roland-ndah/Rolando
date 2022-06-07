@@ -73,18 +73,14 @@ def lambda_handler(event, context):
                   ['EvaluationResultQualifier']['ResourceId'])
 
             non_complaint_resources = non_complaint_resources + \
-
-                result['EvaluationResultIdentifier']['EvaluationResultQualifier']['ResourceId'] + '\n'
+                 result['EvaluationResultIdentifier']['EvaluationResultQualifier']['ResourceId'] + '\n'
 
 
 
         sns_message = 'AWS Config Compliance Update\n\n Rule: ' \
-
-            + MY_RULE + '\n\n' \
-
-            + 'The following resource(s) are not compliant:\n' \
-
-            + non_complaint_resources
+             + MY_RULE + '\n\n' \
+                   + 'The following resource(s) are not compliant:\n' \
+                        + non_complaint_resources
 
 
 
