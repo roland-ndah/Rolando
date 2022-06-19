@@ -22,13 +22,13 @@
       }
     },
     
-    "myappPubsub1": {
+    "sub1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": "us-east-1a",
         "VpcId": { "Ref": "myapp" },
         "CidrBlock": "10.0.1.0/24",
-        "Tags": { "Ref": "myappPubsub1" }
+        "Tags": { "Ref": "sub1" }
         
       }
     }
