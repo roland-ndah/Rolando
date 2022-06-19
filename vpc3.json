@@ -32,23 +32,23 @@
     
   }
 },
-"PrivateSub1": {
+"PrivSub1": {
     "Type": "AWS::EC2::Subnet",
     "Properties": {
       "AvailabilityZone": "us-east-1a",
       "VpcId": { "Ref": "myapp" },
       "CidrBlock": "10.0.3.0/24",
-      "Tags":[ { "Key": "Name", "Value":  "PrivateSub1" }]
+      "Tags":[ { "Key": "Name", "Value":  "PrivSub1" }]
       
     }
   },
-  "PrivateSub2": {
+  "PrivSub2": {
     "Type": "AWS::EC2::Subnet",
     "Properties": {
       "AvailabilityZone": "us-east-1b",
       "VpcId": { "Ref": "myapp" },
       "CidrBlock": "10.0.4.0/24",
-      "Tags":[ { "Key": "Name", "Value":  "PrivateSub2" }]
+      "Tags":[ { "Key": "Name", "Value":  "PrivSub2" }]
       
     }
   },
