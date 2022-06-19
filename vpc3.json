@@ -31,8 +31,14 @@
     "Tags":[ { "Key": "Name", "Value":  "PubSub1" }]
     
   }
-}
 },
+"PubSub2": {
+    "Type": "AWS::EC2::Subnet",
+    "Properties": {
+      "AvailabilityZone": "us-east-1b",
+      "VpcId": { "Ref": "myapp" },
+      "CidrBlock": "10.0.2.0/24",
+      "Tags":[ { "Key": "Name", "Value":  "PubSub2" }]
 
     
     
