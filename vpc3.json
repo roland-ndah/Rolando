@@ -20,9 +20,20 @@
         "CidrBlock": "10.0.0.0/16",
          "Tags":[{ "Key": "Name", "Value":  "Myapp" }]
       }
-    }
+    },
+
+"PubSub1": {
+  "Type": "AWS::EC2::Subnet",
+  "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "VpcId": { "Ref": "myapp" },
+    "CidrBlock": "10.0.1.0/24",
+    "Tags":[ { "Key": "Name", "Value":  "PubSub1" }]
     
+  }
+}
 },
+
     
     
     "Outputs": {
