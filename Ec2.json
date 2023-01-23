@@ -1,82 +1,181 @@
 {
-"AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "",
-    "Metadata": {
-
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "",
+        "Metadata": {
+    
+        },
+        "Parameters": {
+        "VPCCIDR": {
+            "Description": "For my vpc",
+            "Type": "String"
+        },
+      
+      "PubSubCIDR": {
+          "Description": "For public Subnet",
+          "Type": "String"
+      },
+      "PubSub2CIDR": {
+        "Description": "For public Subnet",
+        "Type": "String"
+      },
+      "PrivateSubCIDR": {
+        "Description": "For public Subnet",
+        "Type": "String"
+      },
+      
+      "AZA": {
+          "Description": "US East-1",
+          "Type": "AWS::EC2::AvailabilityZone::Name"
+      },
+      "AZB": {
+        "Description": "US East-1",
+        "Type": "AWS::EC2::AvailabilityZone::Name"
+      }
     },
-    "Parameters": {
-    "VPCID": {
-        "Description": "For my application",
-        "Type": "AWS::EC2::VPC::Id"
         
-    },
-    "WebserverInstanceType": {
-        "Description": "EC2 instance type for  webserver Server",
-        "Type": "String",
-        "Default": "t2.medium",
-        "AllowedValues": ["t1.micro", "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge"],
-        "ConstraintDescription": "must be a valid EC2 instance type."
-    },
+      
+        "Mappings": {
     
-    "KeyPair": {
-        "Description": "For My servers",
-        "Type": "AWS::EC2::KeyPair::KeyName"
-    },
+        },
+        "Conditions": {
     
-    "Subnet1ID": {
-        "Description": "For subnets",
-        "Type": "AWS::EC2::Subnet::Id"
-    },
-    "Subnet2ID": {
-        "Description": " For subnets",
-        "Type": "AWS::EC2::Subnet::Id"
-    },
+        },
+        "Resources": {
+        "myvpc": {
+          "Type": "AWS::EC2::VPC",
+          "Properties": {
+            "CidrBlock": { "Ref": "VPCCIDR" },
+            "Tags": [{ "Key": "Name", "Value":  "myvpc" }]
+          }
+        },
     
-    "ImageID": {
-        "Description": "For my EC2 Instances",
-        "Type": "AWS::EC2::Image::Id"
-   
-    }
-},
         
-    
-    "Mappings": {
-
-    },
-    "Conditions": {
-
-    },
-    "Resources": {
-        "myEC2webserver1": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-              "SubnetId" :{ "Ref": "Subnet1ID" },
-                "KeyName": { "Ref": "KeyPair" },
-                "ImageId": { "Ref": "ImageID" },
-                "InstanceType": { "Ref": "WebserverInstanceType" },
-                "Monitoring": "false",
-                "SecurityGroupIds" : { "Ref": "SecurityA" },
-                "Tags": [{"Key": "Name","Value": "myEC2webserver1"}]
-
-    }
-},
-
-
-        "myEC2webserver2": {
-            "Type": "AWS::EC2::Instance",
-            "Properties": {
-              "SubnetId" :{ "Ref": "Subnet2ID" },
-                "KeyName": { "Ref": "KeyPair" },
-                "ImageId": { "Ref": "ImageID" },
-                "InstanceType": { "Ref": "WebserverInstanceType" },
-                "Monitoring": "false",
-                "SecurityGroupIds" : { "Ref": "SecurityA" },
-                "Tags": [{"Key": "Name","Value": "myEC2webserver2"}]
-            }
+        
+        "myvpcIGW": {
+          "Type": "AWS::EC2::InternetGateway",
+          "Properties": {
+            "Tags":[{ "Key": "Name", "Value":  "myvpcIGW" }]
+          }
+        },
+        "AttachGateway": {
+          "Type": "AWS::EC2::VPCGatewayAttachment",
+          "Properties": {
+            "VpcId": { "Ref": "myvpc" },
+            "InternetGatewayId": { "Ref": "myvpcIGW" }
+          }
+        },
+       
+       
+       "myvpcInfosysRTB": {
+         "Type": "AWS::EC2::RouteTable",
+         "Properties": {
+           "VpcId": { "Ref": "myvpc" },
+          "Tags": [{ "Key": "Name", "Value":  "myvpcRTB" }]
+         }
+       },
+       
+       "InfosysRoute": {
+         "Type": "AWS::EC2::Route",
+         "Properties": {
+           "RouteTableId": { "Ref": "myvpcInfosysRTB" },
+           "DestinationCidrBlock": "0.0.0.0/0",
+           "GatewayId": { "Ref": "myvpcIGW" }
+           
+         }
+       },
+       
+       "PubRouteAss": {
+         "Type": "AWS::EC2::SubnetRouteTableAssociation",
+         "Properties": {
+           "SubnetId": { "Ref": "PublicSub" },
+           "RouteTableId": { "Ref": "myvpcInfosysRTB" }
+           
+         }
+       },
+       
+       "PubRouteAss2": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "PublicSub2" },
+          "RouteTableId": { "Ref": "myvpcInfosysRTB" }
         }
-    },
-
-    "Outputs": {
-
+      },
+       "PublicSub": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+           "AvailabilityZone":  { "Ref": "AZA" },
+            "VpcId": { "Ref": "myvpc" },
+            "CidrBlock":  { "Ref": "PubSubCIDR" },
+            "MapPublicIpOnLaunch": "true",
+            "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
+          }
+        },
+        
+        "webserver": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "KeyName": "ansible2",
+                "DisableApiTermination": "false",
+                "ImageId": "ami-0b5eea76982371e91",
+                "InstanceType": "t2.micro",
+                "SubnetId":{"Ref":"PublicSub2"},
+                "Monitoring": "false",
+                "SecurityGroupIds" : [{ "Ref": "websg" }],
+                "Tags": [{"Key": "-","Value": "webserver"}]
+                
+        }
+      },
+      
+      "websg" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+            "GroupDescription" : "Allow http to client host",
+            "VpcId" : {"Ref" : "myvpc"},
+            "SecurityGroupIngress": [{
+                  "IpProtocol": "tcp",
+                  "FromPort": 80,
+                  "ToPort": 80,
+                  "CidrIp": "0.0.0.0/0"
+              },
+              {
+                  "IpProtocol": "tcp",
+                  "FromPort": 443,
+                  "ToPort": 443,
+                  "CidrIp": "0.0.0.0/0"
+              },
+              {
+                  "IpProtocol": "tcp",
+                  "FromPort": 22,
+                  "ToPort": 22,
+                  "CidrIp": "0.0.0.0/0"
+              }]
+      }
+                
+           
+        },
+      
+        "PublicSub2": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+           "AvailabilityZone":  { "Ref": "AZB" },
+            "VpcId": { "Ref": "myvpc" },
+            "CidrBlock":  { "Ref": "PubSub2CIDR" },
+            "MapPublicIpOnLaunch": "true",
+            "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
+          }
+        },
+        
+        "PrivateSub": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+            "AvailabilityZone":  { "Ref": "AZA" },
+            "VpcId": { "Ref": "myvpc" },
+            "CidrBlock":  { "Ref": "PrivateSubCIDR" },
+            "Tags":[{ "Key": "Name", "Value":  "PrivateSub" }]
+          }
+        }
+      },
+        "Outputs": {
+    
+        }
     }
-}

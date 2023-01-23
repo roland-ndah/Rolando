@@ -7,29 +7,41 @@
     "Parameters": {
     "VPCCIDR": {
         "Description": "For my vpc",
-        "Type": "String"
+        "Type": "String",
+        "Default": "10.0.0.0/16"
+
     },
   
   "PubSubCIDR": {
       "Description": "For public Subnet",
-      "Type": "String"
+      "Type": "String",
+      "Default": "10.0.1.0/24"
   },
   "PubSub2CIDR": {
     "Description": "For public Subnet",
-    "Type": "String"
+    "Type": "String",
+    "Default": "10.0.2.0/24"
   },
   "PrivateSubCIDR": {
-    "Description": "For public Subnet",
-    "Type": "String"
+    "Description": "For private Subnet",
+    "Type": "String",
+    "Default": "10.0.3.0/24"
+  },
+  "PrivateSubCIDR2": {
+    "Description": "For private Subnet",
+    "Type": "String",
+    "Default": "10.0.4.0/24"
   },
   
   "AZA": {
       "Description": "US East-1",
-      "Type": "AWS::EC2::AvailabilityZone::Name"
+      "Type": "AWS::EC2::AvailabilityZone::Name",
+      "Default": "us-east-1a"
   },
   "AZB": {
     "Description": "US East-1",
-    "Type": "AWS::EC2::AvailabilityZone::Name"
+    "Type": "AWS::EC2::AvailabilityZone::Name",
+    "Default": "us-east-1b"
   }
 },
     
@@ -106,23 +118,78 @@
        "AvailabilityZone":  { "Ref": "AZA" },
         "VpcId": { "Ref": "InfosysVPC" },
         "CidrBlock":  { "Ref": "PubSubCIDR" },
+        "MapPublicIpOnLaunch": "true",
         "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
       }
     },
+    
+    "webserver": {
+        "Type": "AWS::EC2::Instance",
+        "Properties": {
+            "KeyName": "ansible2",
+            "DisableApiTermination": "false",
+            "ImageId": "ami-0b5eea76982371e91",
+            "InstanceType": "t2.micro",
+            "SubnetId":{"Ref":"PublicSub2"},
+            "Monitoring": "false",
+            "SecurityGroupIds" : [{ "Ref": "websg" }],
+            "Tags": [{"Key": "-","Value": "webserver"}]
+            
+    }
+  },
+  
+  "websg" : {
+    "Type" : "AWS::EC2::SecurityGroup",
+    "Properties" : {
+        "GroupDescription" : "Allow http to client host",
+        "VpcId" : {"Ref" : "InfosysVPC"},
+        "SecurityGroupIngress": [{
+              "IpProtocol": "tcp",
+              "FromPort": 80,
+              "ToPort": 80,
+              "CidrIp": "0.0.0.0/0"
+          },
+          {
+              "IpProtocol": "tcp",
+              "FromPort": 443,
+              "ToPort": 443,
+              "CidrIp": "0.0.0.0/0"
+          },
+          {
+              "IpProtocol": "tcp",
+              "FromPort": 22,
+              "ToPort": 22,
+              "CidrIp": "0.0.0.0/0"
+          }]
+  }
+            
+       
+    },
+  
     "PublicSub2": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
        "AvailabilityZone":  { "Ref": "AZB" },
         "VpcId": { "Ref": "InfosysVPC" },
         "CidrBlock":  { "Ref": "PubSub2CIDR" },
+        "MapPublicIpOnLaunch": "true",
         "Tags":[{ "Key": "Name", "Value":  "PublicSub" }]
+      }
+    },
+    "PrivateSub2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone":  { "Ref": "AZA" },
+        "VpcId": { "Ref": "InfosysVPC" },
+        "CidrBlock":  { "Ref": "PrivateSubCIDR2" },
+        "Tags":[{ "Key": "Name", "Value":  "PrivateSub2" }]
       }
     },
     
     "PrivateSub": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone":  { "Ref": "AZA" },
+        "AvailabilityZone":  { "Ref": "AZB" },
         "VpcId": { "Ref": "InfosysVPC" },
         "CidrBlock":  { "Ref": "PrivateSubCIDR" },
         "Tags":[{ "Key": "Name", "Value":  "PrivateSub" }]
