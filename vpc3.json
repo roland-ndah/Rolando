@@ -21,6 +21,21 @@
          "Tags":[{ "Key": "Name", "Value":  "Myapp" }]
       }
     },
+    
+    "myappigw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags":[{ "Key": "Name", "Value":  "Myappigw" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "myapp" },
+       "InternetGatewayId": { "Ref": "igwName" }
+      }
+    },
+    
 
 "PubSub1": {
   "Type": "AWS::EC2::Subnet",
