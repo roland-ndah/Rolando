@@ -32,7 +32,7 @@
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "VpcId": { "Ref": "myapp" },
-       "InternetGatewayId": { "Ref": "igwName" }
+       "InternetGatewayId": { "Ref": "myappigw" }
       }
     },
     
