@@ -163,8 +163,8 @@
           },
           {
             "IpProtocol": "tcp",
-              "FromPort": 3389,
-              "ToPort": 3389,
+              "FromPort": 3306,
+              "ToPort": 3306,
               "CidrIp": "0.0.0.0/0"
           }]
   }
