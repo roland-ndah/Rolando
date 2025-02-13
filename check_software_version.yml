@@ -1,0 +1,13 @@
+---
+- name: Check Paramiko Version
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Check if Paramiko is installed
+      command: python3 -c "import paramiko; print(paramiko.__version__)"
+      register: paramiko_version
+      ignore_errors: yes
+
+    - name: Display Paramiko Version
+      debug:
+        msg: "Paramiko version: {{ paramiko_version.stdout if paramiko_version.rc == 0 else 'Not Installed' }}"
